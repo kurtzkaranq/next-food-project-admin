@@ -9,30 +9,34 @@ import Paper from "@mui/material/Paper";
 import { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import { Container } from "@mui/material";
+import { Category } from "../types/categoryType";
+import { Modal } from "@mui/material";
+import Box from "@mui/material/Box";
 import axios from "axios";
 
-type Category = {
-  id: number;
-  name: string;
-  color: string;
-};
-
-export default function BasicTable() {
-  const [category, setCategory] = useState<Category[]>([]);
-  const [open, setOpen] = React.useState(false);
+export default function BasicTable({ categories }: any) {
+  const [open, setOpen] = useState(false);
+  const [data, setData] = useState<Category[] | []>();
   useEffect(() => {
-    axios.get("http://localhost:3000").then((res) => {
-      setCategory(res.data.data);
-    });
-  }, []);
+    setData(categories);
+  }, [categories]);
+  function deleteHandler(e: Category) {
+    console.log(e.id);
+  }
 
-  const handleOpen = () => {
-    setOpen(true);
+  const style = {
+    position: "absolute" as "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 4,
   };
-  const handleClose = () => {
-    setOpen(false);
-  };
-
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
   return (
     <Container>
       <TableContainer component={Paper}>
@@ -47,7 +51,7 @@ export default function BasicTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {category?.map((e) => (
+            {data?.map((e: Category) => (
               <TableRow
                 key={e.id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -60,20 +64,37 @@ export default function BasicTable() {
                 </TableCell>
                 <TableCell align="right">{e.color}</TableCell>
                 <TableCell component="th" scope="row" align="right">
-                  <a href="category">a</a>
-                  <Button variant="outlined" onClick={handleOpen}>
-                    {" "}
-                    EDIT
-                  </Button>
+                  <Button variant="outlined"> EDIT</Button>
                 </TableCell>
                 <TableCell component="th" scope="row" align="right">
-                  <Button variant="outlined" color="error">
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={
+                      () =>
+                        axios.delete("http://localhost:3000/delete", {
+                          data: e,
+                        })
+                      // console.log(data);
+                    }
+                  >
                     DELETE
                   </Button>
+                  <Modal
+                    open={open}
+                    onClose={handleClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                  >
+                    <Box sx={style}></Box>
+                  </Modal>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
+          {/* <Button style={{ display: "flex", justifyContent: "center" }}>
+            ADD
+          </Button> */}
         </Table>
       </TableContainer>
     </Container>
